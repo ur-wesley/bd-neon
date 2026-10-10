@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use eframe::egui::{self, Color32, Key, Modifiers, ScrollArea, Ui};
 
 use crate::discover;
-use crate::model::{recent_from_path, Action, RecentRepo};
+use crate::model::{Action, RecentRepo, recent_from_path};
 
 use super::{icons, theme};
 
@@ -72,10 +72,10 @@ pub fn project_picker(ctx: &egui::Context, props: &PickerProps) -> Vec<Action> {
     let should_close = modal.should_close();
     let out = modal.inner;
     let mut actions = Vec::new();
-    if let Some(next) = out.query {
-        if next != props.query {
-            actions.push(Action::SetPickerQuery(next));
-        }
+    if let Some(next) = out.query
+        && next != props.query
+    {
+        actions.push(Action::SetPickerQuery(next));
     }
     if let Some(delta) = out.delta {
         actions.push(Action::MovePicker(delta));
@@ -179,11 +179,7 @@ const fn clamp_selection(selected: usize, len: usize) -> usize {
         0
     } else {
         let max = len.saturating_sub(1);
-        if selected > max {
-            max
-        } else {
-            selected
-        }
+        if selected > max { max } else { selected }
     }
 }
 
@@ -368,7 +364,7 @@ mod tests {
 
     use crate::model::recent_from_path;
 
-    use super::{clamp_selection, picker_items, step_selection, PickerProps};
+    use super::{PickerProps, clamp_selection, picker_items, step_selection};
 
     fn props_with(tabs: &[PathBuf], recents: &[PathBuf], query: &str) -> PickerProps {
         PickerProps {
@@ -396,9 +392,11 @@ mod tests {
         );
         let items = picker_items(&props, &[]);
         assert!(!items.is_empty());
-        assert!(items
-            .first()
-            .is_some_and(|first| first.path == typed && first.is_typed));
+        assert!(
+            items
+                .first()
+                .is_some_and(|first| first.path == typed && first.is_typed)
+        );
         let _ = std::fs::remove_dir_all(&typed);
     }
 
@@ -412,9 +410,11 @@ mod tests {
             tab_b.to_str().unwrap_or("/work"),
         );
         let items = picker_items(&props, &[]);
-        assert!(items
-            .first()
-            .is_some_and(|first| first.path == tab_b && first.is_typed));
+        assert!(
+            items
+                .first()
+                .is_some_and(|first| first.path == tab_b && first.is_typed)
+        );
         assert_eq!(items.iter().filter(|item| item.path == tab_b).count(), 1);
         let _ = std::fs::remove_dir_all(&tab_a);
         let _ = std::fs::remove_dir_all(&tab_b);
@@ -435,9 +435,11 @@ mod tests {
             let text = item.path.to_string_lossy().to_ascii_lowercase();
             text.contains("neon") || item.name.to_ascii_lowercase().contains("neon")
         }));
-        assert!(items
-            .iter()
-            .all(|item| item.path.as_path() != Path::new("/work/unrelated-zzz")));
+        assert!(
+            items
+                .iter()
+                .all(|item| item.path.as_path() != Path::new("/work/unrelated-zzz"))
+        );
         let first_tab = items.iter().position(|item| item.is_tab);
         let first_recent = items.iter().position(|item| !item.is_tab && !item.is_typed);
         if let (Some(tab), Some(recent)) = (first_tab, first_recent) {

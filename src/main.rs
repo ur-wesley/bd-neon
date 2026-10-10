@@ -33,10 +33,10 @@ fn pick_renderer() -> eframe::Renderer {
             asked = Some("glow".to_owned());
         }
     }
-    if asked.is_none() {
-        if let Ok(value) = std::env::var("BD_NEON_RENDERER") {
-            asked = Some(value.to_lowercase());
-        }
+    if asked.is_none()
+        && let Ok(value) = std::env::var("BD_NEON_RENDERER")
+    {
+        asked = Some(value.to_lowercase());
     }
     match asked.as_deref() {
         Some("glow") => {

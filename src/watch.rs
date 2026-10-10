@@ -1,5 +1,5 @@
 use std::path::{Path, PathBuf};
-use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::mpsc::{Receiver, Sender, channel};
 use std::thread;
 
 use notify::{Config, Event, RecommendedWatcher, Watcher};
@@ -68,19 +68,17 @@ impl WatchService {
                                 | notify::EventKind::Remove(_)
                         )
                     );
-                    if changed {
-                        if let Err(err) = worker_tx.send(WorkerMsg::Refresh) {
-                            eprintln!("[worker] Refresh send failed: {err:?}");
-                        }
+                    if changed && let Err(err) = worker_tx.send(WorkerMsg::Refresh) {
+                        eprintln!("[worker] Refresh send failed: {err:?}");
                     }
                 },
                 Config::default(),
             )
             .ok();
-            if let Some(ref mut active) = watcher {
-                if let Err(err) = active.watch(&beads, notify::RecursiveMode::Recursive) {
-                    eprintln!("[worker] watch failed for {}: {err:?}", beads.display());
-                }
+            if let Some(ref mut active) = watcher
+                && let Err(err) = active.watch(&beads, notify::RecursiveMode::Recursive)
+            {
+                eprintln!("[worker] watch failed for {}: {err:?}", beads.display());
             }
             self.watcher = watcher;
         }
@@ -362,7 +360,7 @@ fn dispatch_post(action_tx: &Sender<Action>, path: &Path, id: &str, body: &str) 
 mod tests {
     use std::sync::mpsc::channel;
 
-    use super::{drain_coalesced, WorkerMsg};
+    use super::{WorkerMsg, drain_coalesced};
 
     #[test]
     fn rapid_switch_keeps_latest_setrepo() {

@@ -6,8 +6,8 @@ use std::time::{Duration, Instant};
 use chrono::{DateTime, Utc};
 
 use crate::model::{
-    format_clock, matches_filter, matches_search, recent_from_path, Action, ClosedTab, Filter,
-    Issue, IssueDetail, IssueRow, KanbanLane, RecentRepo, Screen, Snapshot, ViewMode, ALL_LANES,
+    ALL_LANES, Action, ClosedTab, Filter, Issue, IssueDetail, IssueRow, KanbanLane, RecentRepo,
+    Screen, Snapshot, ViewMode, format_clock, matches_filter, matches_search, recent_from_path,
 };
 
 const FLASH_MS: u64 = 1200;
@@ -78,10 +78,10 @@ impl Store {
                 .or_else(|| recents.first())
                 .cloned()
         });
-        if let Some(ref r) = repo {
-            if !open_tabs.iter().any(|p| p == r) {
-                open_tabs.insert(0, r.clone());
-            }
+        if let Some(ref r) = repo
+            && !open_tabs.iter().any(|p| p == r)
+        {
+            open_tabs.insert(0, r.clone());
         }
         let open_tabs: Vec<PathBuf> = open_tabs
             .into_iter()
@@ -476,11 +476,9 @@ impl Store {
             return Vec::new();
         }
         let was_active = self.repo.as_deref() == Some(path);
-        if was_active {
-            if let Some(next) = self.open_tabs.last().cloned() {
-                self.set_repo(next);
-                return vec![Action::Refresh];
-            }
+        if was_active && let Some(next) = self.open_tabs.last().cloned() {
+            self.set_repo(next);
+            return vec![Action::Refresh];
         }
         self.touch();
         self.persist();
@@ -668,10 +666,10 @@ impl Store {
     fn apply_failed(&mut self, repo: Option<&Path>, message: String) {
         // Stale failures for a previous repo must not clear the loading
         // spinner or overwrite the error of the current repo.
-        if let Some(repo) = repo {
-            if self.repo.as_deref() != Some(repo) {
-                return;
-            }
+        if let Some(repo) = repo
+            && self.repo.as_deref() != Some(repo)
+        {
+            return;
         }
         self.error = Some(message.clone());
         self.loading = false;
@@ -708,12 +706,11 @@ impl Store {
 
         for issue in &snapshot.issues {
             if let Some(updated) = issue.updated_at {
-                if let Some(previous) = self.previous_updated.get(&issue.id) {
-                    if *previous != updated {
-                        if let Some(until) = now.checked_add(flash_duration) {
-                            self.flash_until.insert(issue.id.clone(), until);
-                        }
-                    }
+                if let Some(previous) = self.previous_updated.get(&issue.id)
+                    && *previous != updated
+                    && let Some(until) = now.checked_add(flash_duration)
+                {
+                    self.flash_until.insert(issue.id.clone(), until);
                 }
                 next_updated.insert(issue.id.clone(), updated);
             }
@@ -803,7 +800,7 @@ mod tests {
 
     use chrono::Utc;
 
-    use crate::model::{Action, Issue, IssueDetail, Snapshot, ALL_LANES};
+    use crate::model::{ALL_LANES, Action, Issue, IssueDetail, Snapshot};
 
     use super::Store;
 

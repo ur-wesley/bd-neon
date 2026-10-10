@@ -94,16 +94,16 @@ fn hwnd_from_frame(frame: &eframe::Frame) -> Option<windows::Win32::Foundation::
 
 #[cfg(windows)]
 fn hwnd_from_title(title: &str) -> Option<(windows::Win32::Foundation::HWND, &'static str)> {
-    use windows::core::PCWSTR;
     use windows::Win32::Foundation::HWND;
     use windows::Win32::UI::WindowsAndMessaging::{FindWindowW, GetForegroundWindow};
+    use windows::core::PCWSTR;
 
     // Primary: exact viewport title passed to `eframe::run_native`.
     let wide: Vec<u16> = title.encode_utf16().chain(std::iter::once(0)).collect();
-    if let Ok(hwnd) = unsafe { FindWindowW(None, PCWSTR(wide.as_ptr())) } {
-        if hwnd != HWND::default() {
-            return Some((hwnd, "title"));
-        }
+    if let Ok(hwnd) = unsafe { FindWindowW(None, PCWSTR(wide.as_ptr())) }
+        && hwnd != HWND::default()
+    {
+        return Some((hwnd, "title"));
     }
     // Fallback: foreground window (usually ours when focused/just launched).
     // Covers cases where the actual viewport title differs from
@@ -157,12 +157,12 @@ fn log_hr(label: &str, code: i32) {
 #[cfg(windows)]
 pub fn maintain_borderless_window(hwnd: windows::Win32::Foundation::HWND) {
     use windows::Win32::Graphics::Dwm::{
-        DwmSetWindowAttribute, DWMNCRP_ENABLED, DWMWA_NCRENDERING_POLICY,
+        DWMNCRP_ENABLED, DWMWA_NCRENDERING_POLICY, DwmSetWindowAttribute,
     };
     use windows::Win32::UI::WindowsAndMessaging::{
-        GetWindowLongPtrW, SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, GWL_STYLE,
-        SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, WS_CAPTION,
-        WS_EX_LAYERED, WS_EX_NOREDIRECTIONBITMAP, WS_EX_TRANSPARENT, WS_SYSMENU, WS_THICKFRAME,
+        GWL_EXSTYLE, GWL_STYLE, GetWindowLongPtrW, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE,
+        SWP_NOSIZE, SWP_NOZORDER, SetWindowLongPtrW, SetWindowPos, WS_CAPTION, WS_EX_LAYERED,
+        WS_EX_NOREDIRECTIONBITMAP, WS_EX_TRANSPARENT, WS_SYSMENU, WS_THICKFRAME,
     };
 
     // NOTE: DWMNCRP_USEWINDOWSTYLE (1) tells DWM to skip backdrop rendering
@@ -267,9 +267,9 @@ pub fn maintain_borderless_window(hwnd: windows::Win32::Foundation::HWND) {
 /// Try `--renderer=glow` once to isolate a Wgpu alpha-present quirk.
 pub fn apply_dwm_glass(hwnd: windows::Win32::Foundation::HWND, backdrop: GlassBackdrop) {
     use windows::Win32::Graphics::Dwm::{
-        DwmExtendFrameIntoClientArea, DwmSetWindowAttribute, DWMSBT_MAINWINDOW, DWMSBT_NONE,
-        DWMSBT_TRANSIENTWINDOW, DWMWA_SYSTEMBACKDROP_TYPE, DWMWA_USE_IMMERSIVE_DARK_MODE,
-        DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND,
+        DWMSBT_MAINWINDOW, DWMSBT_NONE, DWMSBT_TRANSIENTWINDOW, DWMWA_SYSTEMBACKDROP_TYPE,
+        DWMWA_USE_IMMERSIVE_DARK_MODE, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND,
+        DwmExtendFrameIntoClientArea, DwmSetWindowAttribute,
     };
     use windows::Win32::UI::Controls::MARGINS;
 
@@ -377,7 +377,9 @@ pub fn refresh_glass(frame: Option<&eframe::Frame>, focused: bool) -> bool {
         return false;
     };
     if !hwnd_belongs_to_current_process(hwnd) {
-        eprintln!("[glass] refusing to style foreign hwnd {hwnd:?} via={source} pid mismatch — alpha-only compositing fallback");
+        eprintln!(
+            "[glass] refusing to style foreign hwnd {hwnd:?} via={source} pid mismatch — alpha-only compositing fallback"
+        );
         return false;
     }
     maintain_borderless_window(hwnd);

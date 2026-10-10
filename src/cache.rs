@@ -77,10 +77,10 @@ pub fn cache_root() -> Option<PathBuf> {
 
 #[cfg(not(test))]
 pub fn cache_root() -> Option<PathBuf> {
-    if let Ok(dir) = std::env::var("BD_NEON_CACHE_DIR") {
-        if !dir.trim().is_empty() {
-            return Some(PathBuf::from(dir));
-        }
+    if let Ok(dir) = std::env::var("BD_NEON_CACHE_DIR")
+        && !dir.trim().is_empty()
+    {
+        return Some(PathBuf::from(dir));
     }
     #[cfg(windows)]
     let base = std::env::var_os("APPDATA");
@@ -157,11 +157,7 @@ fn sanitize_id(id: &str) -> String {
             out.push('_');
         }
     }
-    if out.is_empty() {
-        "_".to_owned()
-    } else {
-        out
-    }
+    if out.is_empty() { "_".to_owned() } else { out }
 }
 
 /// Best-effort atomic file write via a unique sibling temp file + rename.
@@ -203,13 +199,12 @@ pub fn beads_mtime(repo: &Path) -> Option<u64> {
                 stack.push(path);
                 continue;
             }
-            if let Ok(meta) = entry.metadata() {
-                if let Ok(modified) = meta.modified() {
-                    if let Ok(age) = modified.duration_since(UNIX_EPOCH) {
-                        let secs = age.as_secs();
-                        max = Some(max.map_or(secs, |m: u64| m.max(secs)));
-                    }
-                }
+            if let Ok(meta) = entry.metadata()
+                && let Ok(modified) = meta.modified()
+                && let Ok(age) = modified.duration_since(UNIX_EPOCH)
+            {
+                let secs = age.as_secs();
+                max = Some(max.map_or(secs, |m: u64| m.max(secs)));
             }
         }
     }

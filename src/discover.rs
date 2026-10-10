@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
-use crate::model::{recent_from_path, RecentRepo};
+use crate::model::{RecentRepo, recent_from_path};
 
 /// Fuzzy-score weights for [`score_fuzzy`] (values match the doc comment).
 const SCORE_PER_CHAR: i32 = 100;

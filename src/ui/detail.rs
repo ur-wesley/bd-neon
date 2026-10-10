@@ -2,7 +2,7 @@ use eframe::egui::{self, ScrollArea, Ui};
 
 use egui_commonmark::{CommonMarkCache, CommonMarkViewer};
 
-use crate::model::{format_local, Action, Comment, DepNode, IssueDetail};
+use crate::model::{Action, Comment, DepNode, IssueDetail, format_local};
 
 use super::{badge, banner, icon_button, icons, theme};
 

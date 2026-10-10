@@ -129,12 +129,10 @@ fn switcher_popup(
     }
 
     let tab = ui.input(|input| input.key_pressed(Key::Tab));
-    if tab {
-        if let Some(next) = discover::complete_path(query) {
-            *query = next;
-            persist_query(ui, query_id, query);
-            ui.memory_mut(|mem| mem.request_focus(query_id));
-        }
+    if tab && let Some(next) = discover::complete_path(query) {
+        *query = next;
+        persist_query(ui, query_id, query);
+        ui.memory_mut(|mem| mem.request_focus(query_id));
     }
     let down = ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::ArrowDown));
     let up = ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::ArrowUp));

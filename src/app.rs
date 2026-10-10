@@ -5,7 +5,7 @@ use egui_commonmark::CommonMarkCache;
 
 use crate::model::{Action, Screen};
 use crate::platform;
-use crate::store::{Store, MAX_TAB_SLOT};
+use crate::store::{MAX_TAB_SLOT, Store};
 use crate::ui::{board, detail, project_picker, theme, window_chrome};
 use crate::watch::RepoWorker;
 
@@ -182,18 +182,18 @@ impl BdNeonApp {
             ) {
                 actions.push(Action::ReopenTab);
             }
-            if input.consume_key(egui::Modifiers::COMMAND, egui::Key::W) {
-                if let Some(path) = self.store.repo.clone() {
-                    actions.push(Action::CloseTab(path));
-                }
+            if input.consume_key(egui::Modifiers::COMMAND, egui::Key::W)
+                && let Some(path) = self.store.repo.clone()
+            {
+                actions.push(Action::CloseTab(path));
             }
             // CRITICAL: TAB_KEYS is 0-based (Num1 at index 0) but SelectTab
             // slots are 1-based (1..=MAX_TAB_SLOT, Chrome clamp). Num9 also maps to 8.
             for (index, key) in TAB_KEYS.iter().enumerate() {
-                if input.consume_key(egui::Modifiers::COMMAND, *key) {
-                    if let Some(slot) = tab_slot(index) {
-                        actions.push(Action::SelectTab(slot));
-                    }
+                if input.consume_key(egui::Modifiers::COMMAND, *key)
+                    && let Some(slot) = tab_slot(index)
+                {
+                    actions.push(Action::SelectTab(slot));
                 }
             }
         });
