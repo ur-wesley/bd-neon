@@ -1,3 +1,4 @@
+#[cfg(windows)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GlassBackdrop {
     Acrylic,
@@ -5,6 +6,7 @@ pub enum GlassBackdrop {
     None,
 }
 
+#[cfg(windows)]
 pub const MAIN_VIEWPORT_TITLE: &str = "bd-neon";
 
 /// True when `--glass-debug` is on the command line or
