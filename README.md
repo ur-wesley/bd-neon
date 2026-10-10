@@ -1,18 +1,20 @@
 # bd-neon
 
-Native Rust GUI (`eframe 0.36`) for browsing [Beads](https://github.com/gastownhall/beads) issues.
+Fast, native Kanban GUI for [Beads](https://github.com/gastownhall/beads) issue tracking — built in Rust (`eframe 0.36`).
+For devs and agents using the `bd` CLI: instant board, keyboard-first navigation, and a glass OLED-friendly UI. Shells out to `bd` for all issue data — no daemon, no lock-in.
 
 ## Prerequisites
 
-- **Windows 10/11** (64-bit, `x86_64-pc-windows-msvc`).
+- **OS matching the release artifact you download**
+  (currently `x86_64-pc-windows-msvc` for Windows 10/11 64-bit).
 - **GPU with OpenGL support** — the UI renders via `eframe`/`glow`.
 - **`bd` (Beads CLI) on `PATH` at runtime** — bd-neon shells out to `bd`
   for all issue data. Verify with `bd --version` before launching.
   Without `bd` on `PATH`, the issue list stays empty / shows stale state.
 
-## Install (portable zip)
+## Install (portable artifacts)
 
-No installer. Each release ships a portable zip:
+No installer. Each release ships portable artifact(s):
 
 ```text
 bd-neon-<ver>-x86_64-pc-windows-msvc.zip   (contains bd-neon.exe + README.md)

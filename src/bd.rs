@@ -129,7 +129,7 @@ mod tests {
             return;
         }
         let snapshot = fetch_snapshot(repo).expect("fabrik snapshot");
-        assert!(!snapshot.issues.is_empty());
+        assert_ne!(snapshot.issues, Vec::<crate::model::Issue>::new());
     }
 
     #[test]

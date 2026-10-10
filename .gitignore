@@ -7,3 +7,6 @@
 .beads-credential-key
 .beads/proxieddb/
 *.gate.lock*
+
+# graphify cache (generated)
+graphify-out/

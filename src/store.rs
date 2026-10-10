@@ -1024,7 +1024,10 @@ mod tests {
             vec![PathBuf::from("a"), PathBuf::from("b"), PathBuf::from("c"),]
         );
         assert_eq!(store.repo, Some(PathBuf::from("b")));
-        assert!(store.closed_tab_stack.is_empty());
+        assert_eq!(
+            store.closed_tab_stack,
+            Vec::<crate::model::ClosedTab>::new()
+        );
     }
 
     #[test]
@@ -1165,7 +1168,7 @@ mod tests {
             Box::new(detail_for("bd-1")),
         ));
         assert!(!store.comment_posting);
-        assert!(store.comment_draft.is_empty());
+        assert_eq!(store.comment_draft, "");
         assert!(store.comment_error.is_none());
     }
 
@@ -1218,7 +1221,7 @@ mod tests {
         store.comment_draft = "hello".to_owned();
         store.reduce(Action::PostComment);
         store.reduce(Action::OpenDetail("bd-2".to_owned()));
-        assert!(store.comment_draft.is_empty());
+        assert_eq!(store.comment_draft, "");
         assert!(!store.comment_posting);
         assert!(store.comment_error.is_none());
     }

@@ -420,7 +420,7 @@ mod tests {
         assert!(pending.clear_seen);
         assert!(!pending.refresh_seen);
         assert_eq!(pending.latest_repo, None);
-        assert!(pending.details.is_empty());
+        assert_eq!(pending.details, Vec::<String>::new());
         assert!(pending.comments.is_empty());
     }
 
@@ -440,7 +440,7 @@ mod tests {
         .unwrap();
         let pending = drain_coalesced(&rx);
         assert_eq!(pending.latest_repo, Some("b".into()));
-        assert!(pending.details.is_empty());
+        assert_eq!(pending.details, Vec::<String>::new());
         assert_eq!(pending.comments.len(), 1);
         assert_eq!(pending.comments[0].id, "new");
         assert_eq!(pending.comments[0].body, "fresh");

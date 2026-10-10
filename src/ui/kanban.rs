@@ -70,7 +70,8 @@ fn lane_metrics(available: f32, expanded: usize, collapsed: usize) -> (f32, f32)
         Ok(count) => (rest / f32::from(count)).min(theme::LANE_MAX_W),
     };
     #[allow(clippy::arithmetic_side_effects)]
-    let board_w = expanded_w * f32::from(u8::try_from(expanded).unwrap_or(0)) + collapsed_w + gaps;
+    let board_w =
+        expanded_w.mul_add(f32::from(u8::try_from(expanded).unwrap_or(0)), collapsed_w) + gaps;
     (expanded_w, board_w.min(available))
 }
 

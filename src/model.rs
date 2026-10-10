@@ -531,6 +531,6 @@ mod tests {
         // Disk caches written before comments existed lack the field.
         let raw = r#"{"id":"bd-1","title":"t","description":null,"acceptance_criteria":null,"status":"open","priority":2,"kind":"task","assignee":null,"owner":null,"parent":null,"created_at":null,"updated_at":null,"started_at":null,"closed_at":null,"dependencies":[],"dependents":[],"dependency_count":0,"dependent_count":0,"comment_count":0}"#;
         let detail: IssueDetail = serde_json::from_str(raw).expect("valid");
-        assert!(detail.comments.is_empty());
+        assert_eq!(detail.comments, Vec::<Comment>::new());
     }
 }
