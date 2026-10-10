@@ -1,4 +1,6 @@
 use std::collections::HashSet;
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
 use std::path::Path;
 use std::process::Command;
 
@@ -84,6 +86,11 @@ fn ready_ids(repo: &Path) -> Result<HashSet<String>, BdError> {
 fn run_bd(repo: &Path, args: &[&str]) -> Result<String, BdError> {
     let mut command = Command::new("bd");
     command.arg("-C").arg(repo).args(args);
+    // On Windows, `bd` child consoles would otherwise flash a conhost
+    // window on every poll. `CREATE_NO_WINDOW` keeps them hidden.
+    // Main exe already opts out via `windows_subsystem = "windows"`.
+    #[cfg(windows)]
+    command.creation_flags(0x0800_0000);
     let output = command
         .output()
         .map_err(|err| BdError::Spawn(err.to_string()))?;
