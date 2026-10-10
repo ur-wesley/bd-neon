@@ -1,0 +1,20 @@
+# cargo-watch hot reload aliases (no new Rust deps).
+# Usage:
+#   cargo install cargo-watch          # one-time
+#   cargo dev                          # watch src + manifests, rebuild + restart GUI
+#   cargo dev -- C:\path\to\repo      # extra args after -- reach the app (args().nth(1) = repo path)
+#   cargo dev-check / cargo dev-clippy # watch loop for check / clippy
+# Why `-- cargo <cmd>` instead of `-x <cmd>`:
+#   cargo-watch 8.x ignores -x/-s whenever trailing args are present and runs
+#   the trailing text as the full command instead, so `-x run` combined with
+#   `cargo dev -- <path>` would try to execute `<path>` as a command.
+#   The `-- cargo <cmd>` form keeps user args appended to the cargo invocation
+#   (verified: `cargo watch -x check -- --help` fails, `-- cargo check -- --help` works).
+# Notes:
+#   - cargo-watch already skips target/ + .git via .gitignore; -i flags also skip
+#     high-churn local dirs (.beads/, graphify-out/) that are not git-ignored.
+#   - Debounce left at cargo-watch default (0.5s); add `-d 0.3` if you want it snappier.
+[alias]
+dev = "watch -q -c -w src -w Cargo.toml -w Cargo.lock -i target -i .beads -i graphify-out -- cargo run"
+dev-check = "watch -q -c -w src -w Cargo.toml -w Cargo.lock -i target -i .beads -i graphify-out -- cargo check"
+dev-clippy = "watch -q -c -w src -w Cargo.toml -w Cargo.lock -i target -i .beads -i graphify-out -- cargo clippy"

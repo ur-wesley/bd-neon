@@ -1,0 +1,169 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "plan",
+  "agent": {
+    "build": {
+      "description": "Direct build approved spec or ready issue. No orchestrator overhead.",
+      "mode": "primary",
+      "prompt": "# Fabrik agent Build\n\nRun: fabrik show agent build\n",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "task": {
+          "*": "deny",
+          "explore": "allow",
+          "researcher": "allow"
+        }
+      }
+    },
+    "plan": {
+      "description": "Explore and write discussable plan to .fabrik/specs/. No Beads, no code.",
+      "mode": "primary",
+      "prompt": "# Fabrik agent Plan\n\nRun: fabrik show agent plan\n",
+      "permission": {
+        "edit": "allow",
+        "bash": {
+          "*": "deny",
+          "fabrik show*": "allow",
+          "fabrik list*": "allow",
+          "bd list*": "allow",
+          "bd ready*": "allow",
+          "bd show*": "allow"
+        },
+        "task": {
+          "*": "deny",
+          "explore": "allow",
+          "researcher": "allow"
+        }
+      }
+    },
+    "orchestrator": {
+      "description": "Fabrik execute router. After APPROVE: land + builder + tester.",
+      "mode": "primary",
+      "prompt": "# Fabrik subagent Orchestrator\n\nRun: fabrik show agent orchestrator\n",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny",
+        "task": {
+          "*": "deny",
+          "explore": "allow",
+          "researcher": "allow",
+          "briefer": "allow",
+          "planner": "allow",
+          "builder": "allow",
+          "tester": "allow",
+          "reviewer": "allow",
+          "style-smells": "allow",
+          "security": "allow"
+        }
+      }
+    },
+    "explore": {
+      "description": "Read-only codebase study. No edits.",
+      "mode": "subagent",
+      "prompt": "# Fabrik subagent Explore\n\nRun: fabrik show agent explore\n",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny"
+      }
+    },
+    "researcher": {
+      "description": "External research: web, memory, docs. Read-only.",
+      "mode": "subagent",
+      "prompt": "# Fabrik subagent Researcher\n\nRun: fabrik show agent researcher\n",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny"
+      }
+    },
+    "briefer": {
+      "description": "Writes docs/IDEA.md, docs/STACK.md, docs/BRAND.md. Stops before code.",
+      "mode": "subagent",
+      "prompt": "# Fabrik subagent Briefer\n\nRun: fabrik show agent briefer\n",
+      "permission": {
+        "edit": "allow",
+        "bash": "deny"
+      }
+    },
+    "planner": {
+      "description": "Post-APPROVE: land approved spec as Beads issues. No code.",
+      "mode": "subagent",
+      "prompt": "# Fabrik subagent Planner\n\nRun: fabrik show agent planner\n",
+      "permission": {
+        "edit": "deny",
+        "bash": "allow"
+      }
+    },
+    "builder": {
+      "description": "Implements one Beads issue. TDD, minimal diff.",
+      "mode": "subagent",
+      "prompt": "# Fabrik subagent Builder\n\nRun: fabrik show agent builder\n",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow"
+      }
+    },
+    "tester": {
+      "description": "Runs tests, reports pass/fail. Minimal test fixes only.",
+      "mode": "subagent",
+      "prompt": "# Fabrik subagent Tester\n\nRun: fabrik show agent tester\n",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow"
+      }
+    },
+    "reviewer": {
+      "description": "Diff review against spec. No implementation.",
+      "mode": "subagent",
+      "prompt": "# Fabrik subagent Reviewer\n\nRun: fabrik show agent reviewer\n",
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "*": "deny",
+          "git diff*": "allow",
+          "git log*": "allow"
+        }
+      }
+    },
+    "style-smells": {
+      "description": "Style and smells: YAGNI, KISS, DRY, SOLID. No implementation.",
+      "mode": "subagent",
+      "prompt": "# Fabrik subagent Style\n\nRun: fabrik show agent style-smells\n",
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "*": "deny",
+          "git diff*": "allow",
+          "git log*": "allow"
+        }
+      }
+    },
+    "security": {
+      "description": "Security audit. Read-only, no fixes.",
+      "mode": "subagent",
+      "prompt": "# Fabrik subagent Security\n\nRun: fabrik show agent security\n",
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "*": "deny",
+          "git diff*": "allow",
+          "git log*": "allow"
+        }
+      }
+    },
+    "backlog": {
+      "description": "Backlog discover+plan gated land no build.",
+      "mode": "subagent",
+      "prompt": "# Fabrik subagent Backlog\n\nRun: fabrik show agent backlog\n",
+      "permission": {
+        "edit": "deny",
+        "bash": "allow",
+        "task": {
+          "*": "deny",
+          "explore": "allow",
+          "researcher": "allow"
+        }
+      }
+    }
+  }
+}

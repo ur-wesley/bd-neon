@@ -1,0 +1,96 @@
+name: Release
+
+"on":
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Override version for the zip name (default: Cargo.toml package version)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  portable-zip:
+    name: Build portable zip (Windows)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Derive version
+        id: version
+        shell: pwsh
+        run: |
+          $cargoVersion = (Select-String -Path Cargo.toml -Pattern '^version\s*=\s*"([^"]+)"').Matches.Groups[1].Value
+          Write-Host "Cargo.toml version: $cargoVersion"
+
+          $tag = "${{ github.ref_name }}"
+          $isTag = "${{ github.ref_type }}" -eq "tag"
+          $inputVersion = "${{ inputs.version }}"
+
+          if ($isTag) {
+            $version = $tag -replace '^v', ''
+            Write-Host "Tag build: ref_name=$tag -> version=$version"
+            if ($version -ne $cargoVersion) {
+              Write-Error "Tag version '$version' does not match Cargo.toml version '$cargoVersion'. Tag must match Cargo.toml (bump.config.ts bumps Cargo.toml, so create tag v<cargo-version>)."
+              exit 1
+            }
+          } elseif ($inputVersion -ne "") {
+            $version = $inputVersion -replace '^v', ''
+            Write-Host "Manual dispatch with input version: $version (Cargo.toml: $cargoVersion)"
+          } else {
+            $version = $cargoVersion
+            Write-Host "Manual dispatch: falling back to Cargo.toml version $version"
+          }
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "cargo_version=$cargoVersion" >> $env:GITHUB_OUTPUT
+
+      - name: Build release (locked)
+        run: cargo build --release --locked
+
+      - name: Stage portable files
+        shell: pwsh
+        run: |
+          # Footer already uses CARGO_PKG_VERSION at runtime; zip name uses the
+          # validated tag/Cargo.toml version from the previous step.
+          $version = "${{ steps.version.outputs.version }}"
+          New-Item -ItemType Directory -Force -Path dist/stage | Out-Null
+          Copy-Item target/release/bd-neon.exe dist/stage/
+          if (Test-Path README.md) {
+            Copy-Item README.md dist/stage/
+          } else {
+            Write-Host "No README.md in repo root; packaging exe only."
+          }
+          Get-ChildItem dist/stage/
+
+      - name: Create portable zip + SHA256
+        id: package
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $zip = "bd-neon-$version-x86_64-pc-windows-msvc.zip"
+          Compress-Archive -Path dist/stage/* -DestinationPath "dist/$zip" -Force
+          $hash = (Get-FileHash "dist/$zip" -Algorithm SHA256).Hash.ToLower()
+          "$hash  $zip" | Out-File -Encoding ascii "dist/$zip.sha256"
+          Get-ChildItem dist/
+          Get-Content "dist/$zip.sha256"
+          "zip=$zip" >> $env:GITHUB_OUTPUT
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('manual-{0}', steps.version.outputs.version) }}
+          name: bd-neon ${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          files: |
+            dist/${{ steps.package.outputs.zip }}
+            dist/${{ steps.package.outputs.zip }}.sha256
